@@ -65,6 +65,11 @@ public class Main {
 				escapedLine.append('%');
 				escapedLine.append(c);
 				break;
+			case '!':
+				escapedLine.append('^');
+				escapedLine.append('^');
+				escapedLine.append(c);
+				break;
 			default:
 				escapedLine.append(c);
 				break;
