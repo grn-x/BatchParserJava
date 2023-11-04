@@ -1,0 +1,55 @@
+https://stackoverflow.com/questions/6828751/batch-character-escaping
+
+
+Percent Sign %
+
+% can be escaped as %% – "May not always be required [to be escaped] in doublequoted strings, just try"
+Generally, Use a Caret ^
+
+These characters "may not always be required [to be escaped] in doublequoted strings, but it won't hurt":
+
+    ^
+    &
+    <
+    >
+    |
+
+Example: echo a ^> b to print a > b on screen
+
+' is "required [to be escaped] only in the FOR /F "subject" (i.e. between the parenthesis), unless backq is used"
+
+` is "required [to be escaped] only in the FOR /F "subject" (i.e. between the parenthesis), if backq is used"
+
+These characters are "required [to be escaped] only in the FOR /F "subject" (i.e. between the parenthesis), even in doublequoted strings":
+
+    ,
+    ;
+    =
+    (
+    )
+
+Double Escape Exclamation Points when Using Delayed Variable Expansion
+
+! must be escaped ^^! when delayed variable expansion is active.
+Double Double-Quotes in find Search Patterns
+
+" → ""
+Use a Backslash in findstr Regex Patterns
+
+    \
+    [
+    ]
+    "
+    .
+    *
+    ?
+
+Also
+
+Rob commented further on this question (via email correspondence with myself):
+
+    As for the answer, I'm afraid the chaos is even worse than the original poster realizes: requirements for escaping parentheses also depend on the string being inside a code block or not!
+
+    I guess an automated tool could just insert a caret before every character, then doubling all percent signs - and it would still fail if the string is doublequoted!
+
+Further, individual programs are responsible for parsing their command line arguments so some of the escaping required for, e.g. for sed or ssed, may be due to the specific programs called in the batch scripts.
