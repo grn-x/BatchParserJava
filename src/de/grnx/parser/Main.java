@@ -385,7 +385,8 @@ public class Main {
 //                                 while ((line = reader.readLine()) != null) {
 							while ((line = resultReader.readLine()) != null) {
 								// ArrayList<ArrayList<String>> data = new ArrayList<>();
-								if (!line.toString().isBlank()&&!(line.toString().toLowerCase().contains(("setlocal EnableDelayedExpansion").toLowerCase())||line.toString().toLowerCase().contains(("endlocal").toLowerCase()))) {
+//								if (!line.toString().isBlank()&&!(line.toString().toLowerCase().contains(("setlocal EnableDelayedExpansion").toLowerCase())||line.toString().toLowerCase().contains(("endlocal").toLowerCase()))) {
+								if (!line.toString().isBlank()) {
 									writeData(null, null, null, line, index);
 									SwingUtilities.invokeLater(Vcollector::update);
 

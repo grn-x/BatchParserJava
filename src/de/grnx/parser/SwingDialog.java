@@ -27,7 +27,7 @@ import java.util.concurrent.CountDownLatch;
 
 	        // Section 1
 	        JPanel section1 = new JPanel();
-	        section1.setLayout(new GridLayout(6, 2)); // Increase row count to accommodate the checkbox
+	        section1.setLayout(new GridLayout(6, 2)); 
 
 	        label1 = new JLabel("Document Path:");
 	        textField1 = new JTextField(20);
@@ -49,7 +49,7 @@ import java.util.concurrent.CountDownLatch;
 	        section1.add(label4);
 	        section1.add(textField4);
 
-	        checkBox = new JCheckBox("Enable Feature"); // Adding the checkbox
+	        checkBox = new JCheckBox("Enable Delayed Expansion");
 	        section1.add(new JLabel(""));
 	        section1.add(checkBox);
 
@@ -67,7 +67,7 @@ import java.util.concurrent.CountDownLatch;
 	                batchFilePath = textField2.getText();
 	                newBatchName = textField3.getText().isBlank() ? "newBatch.bat" : textField3.getText();
 	                delay = 5000;
-	                checkBoxValue = checkBox.isSelected(); // Get the value of the checkbox
+	                checkBoxValue = checkBox.isSelected();
 
 	                if (documentPath.equals("") || batchFilePath.equals("")) {
 	                    JOptionPane.showMessageDialog(SwingDialog.this,
