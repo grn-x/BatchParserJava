@@ -40,12 +40,13 @@ public class Main {
 	public static String documentPath;
 	public static String batchFilePath;
 	public static String newBatchName;
+	public static boolean enableDelayedExpansion;
 //    public static CustomThreadPool customThreadPool = new CustomThreadPool(Runtime.getRuntime().availableProcessors());
 	public static CustomThreadPool customThreadPool = new CustomThreadPool(1);
 //    public static ExecutorService customThreadPool = Executors.newFixedThreadPool (Runtime.getRuntime().availableProcessors());
 	private static BufferedWriter fileWriter;
 
-	public static String escapeBatchLine(String batchLine) {
+	public static String escapeBatchLine(String batchLine, boolean enableDelayedExpansion) {
 		StringBuilder escapedLine = new StringBuilder();
 
 		for (char c : batchLine.toCharArray()) {
@@ -66,7 +67,7 @@ public class Main {
 				escapedLine.append(c);
 				break;
 			case '!':
-				escapedLine.append('^');
+				if(enableDelayedExpansion)escapedLine.append('^');//normally 1 escape char, but with delayed expansion 2
 				escapedLine.append('^');
 				escapedLine.append(c);
 				break;
@@ -144,12 +145,12 @@ public class Main {
 		}
 	}
 
-	public static void parseDocument(String documentPath, String batchFilePath, String newBatchName) {
+	public static void parseDocument(String documentPath, String batchFilePath, String newBatchName, boolean enableDelayedExpansion) {
 		try (BufferedReader reader = new BufferedReader(new FileReader(documentPath))) {
 			fileWriter = new BufferedWriter(new FileWriter(batchFilePath, true));
 			String line;
 			while ((line = reader.readLine()) != null) {
-				String escapedLine = escapeBatchLine(line);
+				String escapedLine = escapeBatchLine(line, enableDelayedExpansion);
 				appendToBatchFile(fileWriter, escapedLine, line, newBatchName);
 			}
 			if (fileWriter != null) {
@@ -235,6 +236,26 @@ public class Main {
 				System.err.println(
 						"Fourth argument is milliseconds as integer and used in checking stage to set the delay between the execution of the batch script and the reading of the new File");
 			}
+		
+		} else if (args.length == 5) {
+			documentPath = args[0];
+			batchFilePath = args[1];
+			newBatchName = args[2];
+			try {
+				delay = Integer.parseInt(args[3]);
+			} catch (Exception e) {
+				System.err.println(
+						"Fourth argument is milliseconds as integer and used in checking stage to set the delay between the execution of the batch script and the reading of the new File");
+			}
+			
+			try {
+				enableDelayedExpansion = Boolean.parseBoolean(args[4]);
+			}catch (Exception e1) {
+				System.err.println("Fifth argument is a boolean to identify wether the file should have EnableDelayedExpansion enabled or not. This impacts the escaping sequence!");
+			
+			}
+		
+		
 		} else if (args.length == 0) {
 			
 			documentPath = "\\append.bat";
@@ -268,15 +289,67 @@ public class Main {
 		});
 
 		data = new String[countLines(documentPath)][4];
-		parseDocument(documentPath, batchFilePath, newBatchName);
+		parseDocument(documentPath, batchFilePath, newBatchName, enableDelayedExpansion);
 		System.out.println("100% reached!!");
 		// now
+		
+		
+		if(enableDelayedExpansion)preAndAppend(new File(batchFilePath), "setlocal EnableDelayedExpansion", "endlocal");
+		
 		rearGuard(batchFilePath, newBatchName);
 
 		LocalTime start = LocalTime.now();
 		System.out.println(Duration.between(start, LocalTime.now()).toMillis());
 	}
 
+	
+	
+	  public static void preAndAppend(File f, String firstString, String lastString){
+
+	        // Reading the file
+	        try {
+	            BufferedReader reader = new BufferedReader(new FileReader(f));
+	            StringBuilder fileContent = new StringBuilder();
+	            String line = reader.readLine();
+	            boolean firstLineFound = false;
+	            boolean lastLineFound = false;
+	            String lastLine = null;
+
+	            // Checking if the first line contains the required string
+	            if (line != null && line.contains(firstString)) {
+	                firstLineFound = true;
+	            }
+
+	            // Checking the rest of the lines
+	            while (line != null) {
+	                fileContent.append(line).append(System.lineSeparator());
+	                lastLine = line;
+	                line = reader.readLine();
+	            }
+	            reader.close();
+
+	            // Inserting the first string if not found
+	            if (!firstLineFound) {
+	                fileContent.insert(0, firstString + System.lineSeparator());
+	            }
+
+	            // Appending the last string if not found in the last line
+	            if (lastLine != null && !lastLine.contains(lastString)) {
+	                fileContent.append(lastString).append(System.lineSeparator());
+	                lastLineFound = true;
+	            }
+
+	            // Writing back to the file
+	            FileWriter writer = new FileWriter(f);
+	            writer.write(fileContent.toString());
+	            writer.close();
+
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	
+	
 	public static void rearGuard(String batchPath, String newBatchName) {
 		Path tempDir;
 		File createdBatchFile = new File(new File(batchPath).getParent() + File.separator + newBatchName);
@@ -312,7 +385,7 @@ public class Main {
 //                                 while ((line = reader.readLine()) != null) {
 							while ((line = resultReader.readLine()) != null) {
 								// ArrayList<ArrayList<String>> data = new ArrayList<>();
-								if (!line.toString().isBlank()) {
+								if (!line.toString().isBlank()&&!(line.toString().toLowerCase().contains(("setlocal EnableDelayedExpansion").toLowerCase())||line.toString().toLowerCase().contains(("endlocal").toLowerCase()))) {
 									writeData(null, null, null, line, index);
 									SwingUtilities.invokeLater(Vcollector::update);
 
